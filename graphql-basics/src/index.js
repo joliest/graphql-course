@@ -1,7 +1,45 @@
 import { GraphQLServer } from 'graphql-yoga';
 
+// Demo user database
+const users  = [{
+    id: '1',
+    name: 'Joli',
+    email: 'joli@example.com',
+    age: 27
+}, {
+    id: '2',
+    name: 'Je',
+    email: 'je@example.com',
+    age: 29
+}, {
+    id: '3',
+    name: 'Mike',
+    email: 'mike@example.com',
+    age: 30
+}]
+
+const posts  = [{
+    id: '1',
+    title: 'My Post',
+    body: 'Lorem ipsum chena',
+    published: false,
+}, {
+    id: '2',
+    title: 'Joli Post',
+    body: 'Test 123',
+    published: true,
+}, {
+    id: '3',
+    title: 'Je Post',
+    body: 'Hello',
+    published: false,
+}]
+
+
 const typeDefs = `
     type Query {
+        users(query: String): [User!]!
+        posts(query: String): [Post!]!
         me: User!
         post: Post!
     }
@@ -23,6 +61,26 @@ const typeDefs = `
 
 const resolvers = {
     Query: {
+        users(parent, args) {
+            if (!args.query) {
+                return users;
+            }
+
+            return users.filter((user) => {
+                return user.name.toLowerCase().includes(args.query.toLowerCase())
+            })
+        },
+        posts(parent, args) {
+            if (!args.query) {
+                return posts;
+            }
+
+            return posts.filter((post) => {
+                return post.body.toLowerCase().includes(args.query.toLowerCase()) 
+                    || post.title.toLowerCase().includes(args.query.toLowerCase())
+            })
+
+        },
         me() {
             return {
                 id: '123098',
