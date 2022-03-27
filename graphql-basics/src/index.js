@@ -23,16 +23,19 @@ const posts  = [{
     title: 'My Post',
     body: 'Lorem ipsum chena',
     published: false,
+    author: '1',
 }, {
     id: '2',
     title: 'Joli Post',
     body: 'Test 123',
     published: true,
+    author: '1',
 }, {
     id: '3',
     title: 'Je Post',
     body: 'Hello',
     published: false,
+    author: '2',
 }]
 
 
@@ -56,6 +59,7 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean!
+        author: User!
     }
 `
 
@@ -96,8 +100,17 @@ const resolvers = {
                 body: 'Lorem ipsum chena',
                 published: false,
             }
+        },
+    }, 
+    // along side of query, set up property that matches the type name
+    Post: {
+        author(parent, args, ctx, info) {
+            // use "parent" to figure out which user is the correct author
+            return users.find((user) => {
+                return user.id === parent.author
+            })
         }
-    }
+    },
 }
 
 const server = new GraphQLServer({
