@@ -102,10 +102,8 @@ const resolvers = {
             }
         },
     }, 
-    // along side of query, set up property that matches the type name
     Post: {
         author(parent, args, ctx, info) {
-            // use "parent" to figure out which user is the correct author
             return users.find((user) => {
                 return user.id === parent.author
             })
