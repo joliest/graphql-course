@@ -52,6 +52,7 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
     }
 
     type Post {
@@ -109,6 +110,13 @@ const resolvers = {
             })
         }
     },
+    User: {
+        posts(parent, args, ctx, info) {
+            return posts.filter((post) => {
+                return post.author === parent.id
+            })
+        }
+    }
 }
 
 const server = new GraphQLServer({
