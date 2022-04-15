@@ -152,9 +152,9 @@ const resolvers = {
                 throw new Error('Email taken');
             }
 
-            const { name, email, age } = args;
             const user = {
-                id: uuidv4(), name, email, age,
+                id: uuidv4(),
+                ...args,
             };
 
             users.push(user);
@@ -170,10 +170,7 @@ const resolvers = {
             const { title, body, published, author } = args;
             const post = {
                 id: uuidv4(),
-                title,
-                body,
-                published,
-                author,
+                ...args,
             }
 
             posts.push(post);
@@ -190,12 +187,9 @@ const resolvers = {
                 throw new Error('Post not found');
             }
 
-            const { text, author, post } = args;
             const comment = {
                 id: uuidv4(),
-                text,
-                author,
-                post,
+                ...args,
             }
             comments.push(comment);
             return comment;
