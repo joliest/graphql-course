@@ -1,147 +1,24 @@
 import { GraphQLServer } from 'graphql-yoga';
 import uuidv4 from 'uuid/v4';
-
-// Demo user database
-let users  = [{
-    id: '1',
-    name: 'Joli',
-    email: 'joli@example.com',
-    age: 27
-}, {
-    id: '2',
-    name: 'Je',
-    email: 'je@example.com',
-    age: 29
-}, {
-    id: '3',
-    name: 'Mike',
-    email: 'mike@example.com',
-    age: 30
-}]
-
-let posts  = [{
-    id: '1',
-    title: 'My Post',
-    body: 'Lorem ipsum chena',
-    published: false,
-    author: '1',
-}, {
-    id: '2',
-    title: 'Joli Post',
-    body: 'Test 123',
-    published: true,
-    author: '1',
-}, {
-    id: '3',
-    title: 'Je Post',
-    body: 'Hello',
-    published: false,
-    author: '2',
-}]
-
-let comments = [{
-    id: '1',
-    text: 'comment 1',
-    author: '1',
-    post: '1',
-}, {
-    id: '2',
-    text: 'comment 2',
-    author: '2',
-    post: '1',
-}, {
-    id: '3',
-    text: 'comment 3',
-    author: '2',
-    post: '2',
-}, {
-    id: '4',
-    text: 'comment 4',
-    author: '3',
-    post: '3',
-}]
-
-
-const typeDefs = `
-    type Query {
-        users(query: String): [User!]!
-        posts(query: String): [Post!]!
-        me: User!
-        post: Post!
-        comments: [Comment!]!
-    }
-    
-    type Mutation {
-        createUser(data: CreateUserInput!): User!
-        createPost(data: CreatePostInput!): Post!
-        createComment(data: CreateCommentInput!): Comment!
-        deleteUser(id: ID!): User!
-        deletePost(id: ID!): Post!
-        deleteComment(id: ID!): Comment!
-    }
-    
-    input CreateUserInput {
-        name: String!
-        email: String!
-        age: Int
-    }
-    
-    input CreatePostInput {
-        title: String!
-        body: String!
-        published: Boolean!
-        author: ID!
-    }
-    
-    input CreateCommentInput {
-        text: String!
-        author: ID!
-        post: ID!
-    }
-    
-    type User {
-        id: ID!
-        name: String!
-        email: String!
-        age: Int
-        posts: [Post!]!
-        comments: [Comment!]!
-    }
-
-    type Post {
-        id: ID!
-        title: String!
-        body: String!
-        published: Boolean!
-        author: User!
-        comments: [Comment!]!
-    }
-
-    type Comment {
-        id: ID!
-        text: String!
-        author: User!
-        post: Post
-    }
-`
+import db from './db';
 
 const resolvers = {
     Query: {
-        users(parent, args) {
+        users(parent, args, { db }, info) {
             if (!args.query) {
-                return users;
+                return db.users;
             }
 
-            return users.filter((user) => {
+            return db.users.filter((user) => {
                 return user.name.toLowerCase().includes(args.query.toLowerCase())
             })
         },
-        posts(parent, args) {
+        posts(parent, args, { db }) {
             if (!args.query) {
-                return posts;
+                return db.posts;
             }
 
-            return posts.filter((post) => {
+            return db.posts.filter((post) => {
                 return post.body.toLowerCase().includes(args.query.toLowerCase()) 
                     || post.title.toLowerCase().includes(args.query.toLowerCase())
             })
@@ -163,13 +40,13 @@ const resolvers = {
                 published: false,
             }
         },
-        comments() {
-            return comments;
+        comments(parent, args, { db }) {
+            return db.comments;
         }
     },
     Mutation: {
-        createUser(parent, args, ctx, info) {
-            const emailTaken = users.some(user => user.email === args.data.email);
+        createUser(parent, args, { db }, info) {
+            const emailTaken = db.users.some(user => user.email === args.data.email);
             if (emailTaken) {
                 throw new Error('Email taken');
             }
@@ -179,11 +56,11 @@ const resolvers = {
                 ...args.data,
             };
 
-            users.push(user);
+            db.users.push(user);
             return user;
         },
-        createPost(parent, args, ctx, info) {
-            const userExists = users.some(user => user.id === args.data.author);
+        createPost(parent, args, { db }, info) {
+            const userExists = db.users.some(user => user.id === args.data.author);
 
             if (!userExists) {
                 throw new Error('User not found');
@@ -194,16 +71,16 @@ const resolvers = {
                 ...args.data,
             }
 
-            posts.push(post);
+            db.posts.push(post);
             return post;
         },
-        createComment(parent, args, ctx, info) {
-            const userExists = users.some(user => user.id === args.data.author);
+        createComment(parent, args, { db }, info) {
+            const userExists = db.users.some(user => user.id === args.data.author);
             if (!userExists) {
                 throw new Error('User not found');
             }
 
-            const postExists = posts.some(post => post.id === args.data.post);
+            const postExists = db.posts.some(post => post.id === args.data.post);
             if (!postExists) {
                 throw new Error('Post not found');
             }
@@ -212,81 +89,81 @@ const resolvers = {
                 id: uuidv4(),
                 ...args.data,
             }
-            comments.push(comment);
+            db.comments.push(comment);
             return comment;
         },
-        deleteUser(parent, args, ctx, info) {
-            const userIndex = users.findIndex(user => user.id === args.id);
+        deleteUser(parent, args, { db }, info) {
+            const userIndex = db.users.findIndex(user => user.id === args.id);
             if (userIndex === -1) {
                 throw new Error('User not found');
             }
 
-            const deletedUsers = users.splice(userIndex, 1);
+            const deletedUsers = db.users.splice(userIndex, 1);
 
-            posts = posts.filter(post => {
+            db.posts = posts.filter(post => {
                 const match = post.author === args.id;
                 if (match) {
-                    comments = comments.filter(comment => comment.post !== post.id);
+                    db.comments = db.comments.filter(comment => comment.post !== post.id);
                 }
 
                 return !match;
             });
 
-            comments = comments.filter(comment => comment.author !== args.id);
+            db.comments = db.comments.filter(comment => comment.author !== args.id);
             return deletedUsers[0];
         },
-        deletePost(parent, args, ctx, info) {
-            const postIndex = posts.findIndex(post => post.id === args.id);
+        deletePost(parent, args, { db }, info) {
+            const postIndex = db.posts.findIndex(post => post.id === args.id);
             if (postIndex === -1) {
                 throw new Error('Post not found');
             }
 
-            const deletedPosts = posts.splice(postIndex, 1);
-            comments = comments.filter(comment => comment.post !== args.id);
+            const deletedPosts = db.posts.splice(postIndex, 1);
+            db.comments = db.comments.filter(comment => comment.post !== args.id);
             return deletedPosts[0];
         },
-        deleteComment(parent, args, ctx, info) {
-            const commentIndex = comments.findIndex(comment => comment.id === args.id);
+        deleteComment(parent, args, { db }, info) {
+            const commentIndex = db.comments.findIndex(comment => comment.id === args.id);
             if(commentIndex === -1) {
                 throw new Error('Comment not found');
             }
 
-            const deletedComments = comments.splice(commentIndex, 1);
+            const deletedComments = db.comments.splice(commentIndex, 1);
             return deletedComments[0];
         }
     },
     Post: {
-        author(parent, args, ctx, info) {
-            return users.find((user) => {
+        author(parent, args, { db }, info) {
+            return db.users.find((user) => {
                 return user.id === parent.author
             })
         },
-        comments(parent, args, ctx, info) {
-            return comments.filter((comment) => {
+        comments(parent, args, { db }, info) {
+            return db.comments.filter((comment) => {
                 return comment.post === parent.id
             });
         }
     },
     User: {
-        posts(parent, args, ctx, info) {
-            return posts.filter((post) => {
+        posts(parent, args, { db }, info) {
+            return db.posts.filter((post) => {
                 return post.author === parent.id
             })
         },
-        comments(parent, args, ctx, info) {
-            return comments.filter((comment) => {
+        comments(parent, args, { db }, info) {
+            return db.comments.filter((comment) => {
                 return comment.author === parent.id
             })
         }
     },
     Comment: {
-        author(parent, args, ctx, info) {
-            return users.find((user) => {
+        author(parent, args, { db }, info) {
+            return db.users.find((user) => {
                 return user.id === parent.author
             })
         },
-        post(parent, args, ctx, info) {
-            return posts.find((post) => {
+        post(parent, args, { db }, info) {
+            return db.posts.find((post) => {
                 return post.id === parent.post
             })
         }
@@ -294,8 +171,11 @@ const resolvers = {
 }
 
 const server = new GraphQLServer({
-    typeDefs,
+    typeDefs: './src/schema.graphql',
     resolvers,
+    context: {
+        db
+    }
 })
 
 server.start(() => {
