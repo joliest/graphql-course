@@ -48,26 +48,6 @@ const Mutation = {
         db.comments.push(comment);
         return comment;
     },
-    deleteUser(parent, args, { db }, info) {
-        const userIndex = db.users.findIndex(user => user.id === args.id);
-        if (userIndex === -1) {
-            throw new Error('User not found');
-        }
-
-        const deletedUsers = db.users.splice(userIndex, 1);
-
-        db.posts = posts.filter(post => {
-            const match = post.author === args.id;
-            if (match) {
-                db.comments = db.comments.filter(comment => comment.post !== post.id);
-            }
-
-            return !match;
-        });
-
-        db.comments = db.comments.filter(comment => comment.author !== args.id);
-        return deletedUsers[0];
-    },
     updateUser(parent, args, { db }, info) {
         const { id, data } = args;
         const user = db.users.find(user => user.id === id);
@@ -94,6 +74,60 @@ const Mutation = {
         }
 
         return user;
+    },
+    updatePost(parent, args, { db }, info) {
+        const { id, data } = args;
+        const post = db.posts.find(post => post.id === id);
+        if (!post) {
+            throw new Error('Post not found');
+        }
+
+        if (typeof data.title === 'string') {
+            post.title = data.title;
+        }
+
+        if (typeof data.body === 'string') {
+            post.body = data.body;
+        }
+
+        if (typeof data.published === 'boolean') {
+            post.published = data.published;
+        }
+
+        return post;
+    },
+    updateComment(parent, args, { db }, info) {
+        const { id, data } = args;
+        const comment = db.comments.find(comment => comment.id === id);
+        if (!comment) {
+            throw new Error('Comment not found');
+        }
+
+        if (typeof data.text === 'string') {
+            comment.text = data.text
+        }
+
+        return comment
+    },
+    deleteUser(parent, args, { db }, info) {
+        const userIndex = db.users.findIndex(user => user.id === args.id);
+        if (userIndex === -1) {
+            throw new Error('User not found');
+        }
+
+        const deletedUsers = db.users.splice(userIndex, 1);
+
+        db.posts = posts.filter(post => {
+            const match = post.author === args.id;
+            if (match) {
+                db.comments = db.comments.filter(comment => comment.post !== post.id);
+            }
+
+            return !match;
+        });
+
+        db.comments = db.comments.filter(comment => comment.author !== args.id);
+        return deletedUsers[0];
     },
     deletePost(parent, args, { db }, info) {
         const postIndex = db.posts.findIndex(post => post.id === args.id);
