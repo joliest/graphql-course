@@ -49,7 +49,7 @@ const comments = [{
     id: '3',
     text: 'comment 3',
     author: '2',
-    post: '2',
+    post: '2',  
 }, {
     id: '4',
     text: 'comment 4',
