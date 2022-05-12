@@ -31,7 +31,7 @@ const posts  = [{
     id: '3',
     title: 'Je Post',
     body: 'Hello',
-    published: false,
+    published: true,
     author: '2',
 }]
 
