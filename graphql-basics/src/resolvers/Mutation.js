@@ -15,8 +15,9 @@ const Mutation = {
         db.users.push(user);
         return user;
     },
-    createPost(parent, args, { db }, info) {
-        const userExists = db.users.some(user => user.id === args.data.author);
+    createPost(parent, args, { db, pubsub }, info) {
+        const { data } = args;
+        const userExists = db.users.some(user => user.id === data.author);
 
         if (!userExists) {
             throw new Error('User not found');
@@ -24,7 +25,11 @@ const Mutation = {
 
         const post = {
             id: uuidv4(),
-            ...args.data,
+            ...data,
+        }
+
+        if (post.published) {
+            pubsub.publish('post', { post })
         }
 
         db.posts.push(post);
