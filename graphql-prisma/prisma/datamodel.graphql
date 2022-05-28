@@ -3,4 +3,5 @@ directive @unique on OBJECT | FIELD_DEFINITION
 type User {
   id: ID! @unique
   name: String!
+  email: String!
 }
