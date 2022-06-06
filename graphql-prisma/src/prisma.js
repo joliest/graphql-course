@@ -9,9 +9,11 @@ const userQuery = `
     {
         id
         name 
+        email
         posts {
             id 
             title 
+            published
         } 
     }  
 `;
@@ -24,6 +26,33 @@ const post = `
         published
     }
 `
+
+const createPostForUser = async (authorId, data) => {
+    const post = await prisma.mutation.createPost({
+        data: {
+            ...data,
+            author: {
+                connect: {
+                    id: authorId
+                }
+            }
+        },
+    }, '{ id }')
+    const user = await prisma.query.user({
+        where: {
+            id: authorId
+        }
+    }, userQuery)
+    return user
+}
+
+createPostForUser('cl3p9abv900380f284da2yfuv', {
+    title: 'Great books to read 2',
+    body: 'The war of art 2',
+    published: true,
+}).then((user) => {
+    console.log(JSON.stringify(user, undefined, 2))
+})
 /*
 prisma.mutation.createPost({
     data: {
