@@ -15,34 +15,6 @@ const userQuery = `
         } 
     }  
 `;
-/*
-prisma.query.users(null, userQuery)
-    .then((data) => {
-        console.log(JSON.stringify(data, undefined, 2))
-    })
-    .catch((e) => {
-
-    })
-
-
-const commentQuery = `
-    {
-        id
-        text
-        author {
-            name
-            email
-        }
-  }
-`
-prisma.query.comments(null, commentQuery)
-    .then((data) => {
-        // console.log(JSON.stringify(data, undefined, 2))
-    })
-    .catch((e) => {
-
-    })
- */
 
 const post = `
     {
@@ -72,6 +44,7 @@ prisma.mutation.createPost({
 })
  */
 
+/*
 prisma.mutation.updatePost({
     data: {
         published: false,
@@ -85,3 +58,4 @@ prisma.mutation.updatePost({
 }).then((data) => {
     console.log(JSON.stringify(data, undefined, 2))
 })
+ */
