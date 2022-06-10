@@ -71,13 +71,13 @@ const updatePostForUser = async (postId, data) => {
     return newPost;
 }
 
-updatePostForUser('cl41yuetc00s3i0g28zyx6t1cn', { published: false })
-    .then((post) => {
-        console.log(JSON.stringify(post, undefined, 2))
-    })
-    .catch((error) => {
-        console.log(error)
-    })
+// updatePostForUser('cl41yuetc00s3i0g28zyx6t1cn', { published: false })
+//     .then((post) => {
+//         console.log(JSON.stringify(post, undefined, 2))
+//     })
+//     .catch((error) => {
+//         console.log(error)
+//     })
 
 prisma.mutation.createPost({
     data: {
