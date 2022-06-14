@@ -1,31 +1,32 @@
-import prisma from '../prisma';
-
 const Query = {
     users(parent, args, { db, prisma }, info) {
-        // if (!args.query) {
-        //     return db.users;
-        // }
-        //
-        // return db.users.filter((user) => {
-        //     return user.name.toLowerCase().includes(args.query.toLowerCase())
-        // })
+        const operationArguments = {}
 
-        /*
-         * info` contains all the information
-         * return this call as it's a promise
-         */
-        return prisma.query.users(null, info)
+        if (args.query) {
+            operationArguments.where = {
+                OR: [{
+                    name_contains: args.query
+                }, {
+                    email_contains: args.query
+                }]
+            }
+        }
+        return prisma.query.users(operationArguments, info)
     },
     posts(parent, args, { prisma }, info) {
-        // if (!args.query) {
-        //     return db.posts;
-        // }
-        //
-        // return db.posts.filter((post) => {
-        //     return post.body.toLowerCase().includes(args.query.toLowerCase())
-        //         || post.title.toLowerCase().includes(args.query.toLowerCase())
-        // })
-        return prisma.query.posts(null, info);
+        const operationArguments = {}
+
+        if (args.query) {
+            operationArguments.where = {
+                OR: [{
+                    title_contains: args.query
+                }, {
+                    body_contains: args.query
+                }]
+            }
+        }
+
+        return prisma.query.posts(operationArguments, info);
     },
     me() {
         return {
